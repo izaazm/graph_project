@@ -1,5 +1,5 @@
 ### Generate new knowledge graph ###
-from proj.utils_data import *
+from utils import *
 import argparse
 import random
 import os
@@ -104,4 +104,4 @@ if not args.no_save:
 	save_dir = f"./{args.data_tgt}/"
 	os.makedirs(save_dir, exist_ok=True)
 	write(save_dir + 'train.txt', train)
-	write(save_dir + 'kg_inference.txt', test)
+	write(save_dir + 'kg_inference.txt', test) 
