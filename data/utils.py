@@ -100,10 +100,15 @@ def merge(x, y, p):
 		random.shuffle(y)
 		return x[:int(num_tot * (1 - p))] + y[:int(num_tot * p)]
 
-def gcc(triplet):
+def gcc(facts):
 	edge = []
-	for h, r, t in triplet:
+	for (h, r, t) in facts:
 		edge.append((h, t))
+		for qual in facts[(h, r, t)]:
+			_, v = qual
+			edge.append((h, v))
+			edge.append((t, v))
+
 	G = nx.Graph()
 	G.add_edges_from(edge)
 	largest_cc = max(nx.connected_components(G), key=len)
