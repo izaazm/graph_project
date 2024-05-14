@@ -20,7 +20,7 @@ seed = int(100 * args.n_train * args.n_test / args.p_rel * args.seed)
 random.seed(seed)
 
 ### Read entities/relations ###
-_, _, triplet_all = read_KG(f"./triplets/{args.data_src}.txt")
+_, _, fact_all = read_KG(f"./triplets/{args.data_src}.json")
 
 ### Take GCC ###
 gcc_all = gcc(triplet_all)
