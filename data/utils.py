@@ -1,21 +1,49 @@
 import networkx as nx
 import random
+import json
 
 def remove_duplicate(x):
 	return list(dict.fromkeys(x))
 
-def read_KG(path):
+def remove_duplicate_facts(facts):
+	facts_dict = dict()
+	for triplets, qual in facts:
+		if triplets in facts_dict:
+			facts_dict[triplets].extend(qual)
+		else:
+			facts_dict[triplets] = qual
+	
+	for triplets in facts_dict:
+		facts_dict[triplets] = remove_duplicate(facts_dict[triplets])
+
+	return facts_dict
+	
+
+def read_HKG(path):
 	entity = []
 	relation = []
 	triplet = []
+	facts = []
+
 	with open(path, 'r') as f:
 		for line in f.readlines():
-			h, r, t = line.strip().split('\t')
+			cur_fact = json.loads(line)
+			qual = []
+			for i, rel in enumerate(cur_fact):
+				if i == 0:
+					r = rel
+					h, t = cur_fact[rel]
+				elif rel != "N":
+					relation.append(rel)
+					qual.append((rel, cur_fact[rel]))
+
 			entity.append(h)
 			entity.append(t)
 			relation.append(r)
 			triplet.append((h, r, t))
-	return remove_duplicate(entity), remove_duplicate(relation), remove_duplicate(triplet)
+			facts.append(((h, r, t), qual))
+
+	return remove_duplicate(entity), remove_duplicate(relation), remove_duplicate(triplet), remove_duplicate_facts(facts)
 
 def gather(x):
 	ent = []
