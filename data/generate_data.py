@@ -20,20 +20,30 @@ seed = int(100 * args.n_train * args.n_test / args.p_rel * args.seed)
 random.seed(seed)
 
 ### Read entities/relations ###
-_, _, fact_all = read_KG(f"./triplets/{args.data_src}.json")
+_, _, _, fact_all = read_HKG(f"{args.data_src}.json")
 
 ### Take GCC ###
-gcc_all = gcc(triplet_all)
-entity, relation, triplet = [], [], []
-for h, r, t in triplet_all:
+gcc_all = gcc(fact_all)
+entity, relation, triplet, fact = [], [], [], []
+for (h, r, t) in fact_all:
 	if h in gcc_all:
 		entity.append(h)
 		entity.append(t)
 		relation.append(r)
 		triplet.append((h, r, t))
 
+		qual = []
+		for (q, v) in fact_all[(h, r, t)]:
+			if v in gcc_all:
+				entity.append(v)
+				relation.append(q)
+				qual.append((q, v))
+		
+		fact.append(((h, r, t), qual)) 
+
 entity = remove_duplicate(entity)
 relation = remove_duplicate(relation)
+fact = remove_duplicate_facts(fact)
 
 ### Split relation set into train/valid/test ###
 num_relation = len(relation)
