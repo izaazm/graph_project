@@ -35,7 +35,8 @@ print(len(entity), len(relation), len(fact))
 
 num_relation = len(relation)
 random.shuffle(relation)
-relation_test = set(relation[:int(num_relation * 0.2)])
-relation_train = set(relation[int(num_relation * 0.2):])
+relation_test = set(relation[:int(num_relation * 0.25)])
+relation_train = set(relation[int(num_relation * 0.25):])
 
-print(len(relation_test), len(relation_train))
+seed_train = random.sample(entity, args.n_train)
+entity_train = sample_2hop(triplet, seed_train, 50)
