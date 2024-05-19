@@ -1,3 +1,4 @@
+# split validation and test from kg_inference
 import igraph
 import os
 import random

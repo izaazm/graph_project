@@ -1,4 +1,4 @@
-### Generate new knowledge graph ###
+# Generate new knowledge graph of test and inference (kg_inference)
 from utils import *
 import argparse
 import random
@@ -43,7 +43,7 @@ for (h, r, t) in fact_all:
 
 entity = remove_duplicate(entity)
 relation = remove_duplicate(relation)
-fact = remove_duplicate_facts(fact)
+facts = remove_duplicate_facts(fact)
 
 ### Split relation set into train/valid/test ###
 num_relation = len(relation)
@@ -56,7 +56,7 @@ relation_train = set(relation_train)
 
 ### Sample neighbors from train seeds ###
 seed_train = random.sample(entity, args.n_train)
-entity_train = sample_2hop(triplet, seed_train, 50)
+entity_train = sample_2hop(facts, seed_train, 50)
 
 ### Generate train set ###
 train_all = []

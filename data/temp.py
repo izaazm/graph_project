@@ -1,3 +1,4 @@
+# dummy file to test changes
 from utils import *
 
 entity_all, relation_all, triplet_all, fact_all = read_HKG("./JF17K_25/full.json")
@@ -25,7 +26,7 @@ for (h, r, t) in fact_all:
 	# 	print(h, r, t)
 	# 	for (q, v) in fact_all[(h, r, t)]:
 	# 		print(q, v)
-	# 	print()
+	# 	print("mmk")
 
 entity = remove_duplicate(entity)
 relation = remove_duplicate(relation)
@@ -39,4 +40,4 @@ relation_test = set(relation[:int(num_relation * 0.25)])
 relation_train = set(relation[int(num_relation * 0.25):])
 
 seed_train = random.sample(entity, args.n_train)
-entity_train = sample_2hop(triplet, seed_train, 50)
+entity_train = sample_2hop(fact, seed_train, 50)

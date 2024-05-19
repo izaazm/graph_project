@@ -1,3 +1,4 @@
+# utility function
 import networkx as nx
 import random
 import json
@@ -75,11 +76,11 @@ def gather_neighbor(triplet, x, thr):
 		res = random.sample(res, thr)
 	return res
 
-def sample_2hop(triplet, x, thr):
+def sample_2hop(facts, x, thr):
 	sample = set()
 	for e in x:
 		neighbor = set([e])
-		neighbor_1hop = gather_neighbor(triplet, e, thr)
+		neighbor_1hop = gather_neighbor(facts, e, thr)
 		neighbor = neighbor.union(set(neighbor_1hop))
 
 		for e1 in neighbor_1hop:
