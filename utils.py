@@ -3,6 +3,19 @@ import numpy as np
 def remove_duplicate(x):
 	return list(dict.fromkeys(x))
 
+def remove_duplicate_facts(facts):
+	facts_dict = dict()
+	for triplets, qual in facts:
+		if triplets in facts_dict:
+			facts_dict[triplets].extend(qual)
+		else:
+			facts_dict[triplets] = qual
+	
+	for triplets in facts_dict:
+		facts_dict[triplets] = remove_duplicate(facts_dict[triplets])
+
+	return facts_dict
+
 def generate_neg(triplets, num_ent, num_neg = 1):
 	import torch
 	neg_triplets = triplets.unsqueeze(dim=1).repeat(1,num_neg,1)

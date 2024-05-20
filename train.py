@@ -24,8 +24,11 @@ args = parse()
 
 assert args.data_name in os.listdir(args.data_path), f"{args.data_name} Not Found"
 path = args.data_path + args.data_name + "/"
-train = TrainData(path)
-valid = TestNewData(path, data_type = "valid")
+train_triplets = TrainData(path)
+valid_triplets = TestNewData(path, data_type="valid")
+
+train_qual = TrainData(path, qual=True)
+valid_qual = TestNewData(path, qual=True, data_type="valid")
 
 if not args.no_write:
 	os.makedirs(f"./ckpt/{args.exp}/{args.data_name}", exist_ok=True)
