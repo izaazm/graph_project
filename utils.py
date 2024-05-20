@@ -1,4 +1,7 @@
+import torch
+import json
 import numpy as np
+from relgraph import generate_relation_triplets
 
 def remove_duplicate(x):
 	return list(dict.fromkeys(x))
@@ -16,8 +19,46 @@ def remove_duplicate_facts(facts):
 
 	return facts_dict
 
+def read_HKG(path):
+	entity = []
+	relation = []
+	triplet = []
+	facts = []
+
+	with open(path, 'r') as f:
+		for line in f.readlines():
+			cur_fact = json.loads(line)
+			qual = []
+			for i, rel in enumerate(cur_fact):
+				if i == 0:
+					r = rel
+					h, t = cur_fact[rel]
+				elif rel != "N":
+					relation.append(rel)
+					qual.append((rel, cur_fact[rel]))
+
+			entity.append(h)
+			entity.append(t)
+			relation.append(r)
+			triplet.append((h, r, t))
+			facts.append(((h, r, t), qual))
+
+	return remove_duplicate(entity), remove_duplicate(relation), remove_duplicate(triplet), remove_duplicate_facts(facts)
+
+def initialize(target, msg, d_e, d_r, B):
+
+    init_emb_ent = torch.zeros((target.num_ent, d_e)).cuda()
+    init_emb_rel = torch.zeros((2*target.num_rel, d_r)).cuda()
+    gain = torch.nn.init.calculate_gain('relu')
+    torch.nn.init.xavier_normal_(init_emb_ent, gain = gain)
+    torch.nn.init.xavier_normal_(init_emb_rel, gain = gain)
+    relation_triplets = generate_relation_triplets(msg, target.num_ent, target.num_rel, B)
+
+    relation_triplets = torch.tensor(relation_triplets).cuda()
+
+    return init_emb_ent, init_emb_rel, relation_triplets
+
 def generate_neg(triplets, num_ent, num_neg = 1):
-	import torch
 	neg_triplets = triplets.unsqueeze(dim=1).repeat(1,num_neg,1)
 	rand_result = torch.rand((len(triplets),num_neg)).cuda()
 	perturb_head = rand_result < 0.5
