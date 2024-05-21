@@ -36,7 +36,6 @@ for (h, r, t) in fact_all:
 		for (q, v) in fact_all[(h, r, t)]:
 			if v in gcc_all:
 				entity.append(v)
-				relation.append(q)
 				qual.append((q, v))
 		
 		fact.append(((h, r, t), qual)) 
@@ -64,7 +63,7 @@ for h, r, t in triplet:
 	if h in entity_train and r in relation_train and t in entity_train:
 		qual = []
 		for (q, v) in facts[(h, r, t)]:
-			if v in entity_train and q in relation_train:
+			if v in entity_train:
 				qual.append((q, v))
 		
 		train_all[(h, r, t)] = qual
@@ -94,13 +93,13 @@ for h, r, t in triplet_p:
 	if h in entity_test and r in relation_train and t in entity_test:
 		qual = []
 		for (q, v) in facts[(h, r, t)]:
-			if v in entity_test and q in relation_train:
+			if v in entity_test:
 				qual.append((q, v))
 		test_x.append(((h, r, t), qual))
 	elif h in entity_test and r in relation_test and t in entity_test:
 		qual = []
 		for (q, v) in facts[(h, r, t)]:
-			if v in entity_test and q in relation_test:
+			if v in entity_test:
 				qual.append((q, v))
 		test_y.append(((h, r, t), qual))
 
