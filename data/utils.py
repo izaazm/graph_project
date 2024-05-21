@@ -60,9 +60,18 @@ def check_no_overlap(x, y):
 	print("Done: Check no overlap")
 
 def write(path, x):
+	triplet_seen = set()
 	with open(path, 'w') as f:
-		for h, r, t in x:
-			f.write(f"{h}\t{r}\t{t}\n")
+		for triplet in x:
+			fact = dict()
+			if triplet not in triplet_seen: # not a duplicate
+				h, r, t = triplet
+				fact[r] = [h, t]
+				for q, v in x[triplet]:
+					fact[q] = v
+				
+				f.write(json.dumps(fact) + '\n')
+				triplet_seen.add(triplet)
 
 def gather_neighbor(triplet, x, thr):
 	res = []
@@ -84,7 +93,7 @@ def sample_2hop(facts, x, thr):
 		neighbor = neighbor.union(set(neighbor_1hop))
 
 		for e1 in neighbor_1hop:
-			neighbor_2hop = gather_neighbor(triplet, e1, thr)
+			neighbor_2hop = gather_neighbor(facts, e1, thr)
 			neighbor = neighbor.union(set(neighbor_2hop))
 
 		sample = sample.union(neighbor)

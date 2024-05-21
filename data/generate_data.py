@@ -59,18 +59,22 @@ seed_train = random.sample(entity, args.n_train)
 entity_train = sample_2hop(facts, seed_train, 50)
 
 ### Generate train set ###
-train_all = []
+train_all = dict()
 for h, r, t in triplet:
 	if h in entity_train and r in relation_train and t in entity_train:
-		train_all.append((h, r, t))
+		qual = []
+		for (q, v) in facts[(h, r, t)]:
+			if v in entity_train and q in relation_train:
+				qual.append((q, v))
+		
+		train_all[(h, r, t)] = qual
 
 ### Take GCC ###
 gcc_train = gcc(train_all)
-train = []
+train = dict()
 for h, r, t in train_all:
 	if h in gcc_train:
-		train.append((h, r, t))
-random.shuffle(train)
+		train[(h, r, t)] = train_all[(h, r, t)]
 
 ### Remove train entities ###
 triplet_p = []
@@ -88,20 +92,28 @@ test_x = []
 test_y = []
 for h, r, t in triplet_p:
 	if h in entity_test and r in relation_train and t in entity_test:
-		test_x.append((h, r, t))
+		qual = []
+		for (q, v) in facts[(h, r, t)]:
+			if v in entity_test and q in relation_train:
+				qual.append((q, v))
+		test_x.append(((h, r, t), qual))
 	elif h in entity_test and r in relation_test and t in entity_test:
-		test_y.append((h, r, t))
+		qual = []
+		for (q, v) in facts[(h, r, t)]:
+			if v in entity_test and q in relation_test:
+				qual.append((q, v))
+		test_y.append(((h, r, t), qual))
 
 ### Merge X_test and Y_test ###
 test_all = merge(test_x, test_y, args.p_tri)
+test_all = dict(test_all)
 
 ### Take GCC ###
 gcc_test = gcc(test_all)
-test = []
+test = dict()
 for h, r, t in test_all:
 	if h in gcc_test:
-		test.append((h, r, t))
-random.shuffle(test)
+		test[(h, r, t)] = test_all[(h, r, t)]
 
 ### Check no overlap ###
 check_no_overlap(gcc_train, gcc_test)
@@ -113,5 +125,5 @@ print("Number of triplets in Inference KG:", len(test))
 if not args.no_save:
 	save_dir = f"./{args.data_tgt}/"
 	os.makedirs(save_dir, exist_ok=True)
-	write(save_dir + 'train.txt', train)
-	write(save_dir + 'kg_inference.txt', test) 
+	write(save_dir + 'train.json', train)
+	write(save_dir + 'kg_inference.json', test) 
