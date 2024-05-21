@@ -9,7 +9,7 @@ print(device)
 if torch.cuda.is_available():
     print("device: ", torch.cuda.get_device_name(0))
 
-train = TrainData("./data_dummy/dummy", qual=False)
+train = TrainData("./data_dummy/dummy", qual=True)
 msg, sup = train.split_transductive(0.75)
 
 msg = torch.tensor(msg).cuda()
