@@ -2,7 +2,7 @@ import torch
 from utils import get_rank, get_metrics
 from tqdm import tqdm
 
-def evaluate(my_model, target, epoch, init_emb_ent, init_emb_rel, relation_triplets, qual=False):
+def evaluate(my_model, target, init_emb_ent, init_emb_rel, relation_triplets, qual=False):
     with torch.no_grad():
         my_model.eval()
         msg = torch.tensor(target.msg_triplets).cuda()
@@ -37,10 +37,4 @@ def evaluate(my_model, target, epoch, init_emb_ent, init_emb_rel, relation_tripl
             ranks.append(tail_rank)
             tail_ranks.append(tail_rank)
 
-
-        print("--------LP--------")
-        mr, mrr, hit10, hit3, hit1 = get_metrics(ranks)
-        print(f"MR: {mr:.1f}")
-        print(f"MRR: {mrr:.3f}")
-        print(f"Hits@10: {hit10:.3f}")
-        print(f"Hits@1: {hit1:.3f}")
+        return ranks
