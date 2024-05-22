@@ -29,12 +29,15 @@ COPY ./environment.yml /tmp/environment.yml
 RUN conda update conda \
     && conda env create --name ingram --file /tmp/environment.yml
 
+# install pytorch inside conda environment
+RUN conda init
+SHELL ["bash", "-lc"]
+RUN conda activate ingram && pip3 install torch torchvision torchaudio -f https://download.pytorch.org/whl/cu121/torch_stable.html
+
+# setup conda environment variable
 RUN echo "conda activate ingram" >> ~/.bashrc
 ENV PATH /opt/conda/envs/ingram/bin:$PATH
 ENV CONDA_DEFAULT_ENV $ingram
-
-# install pytorch
-RUN pip3 install torch torchvision torchaudio -f https://download.pytorch.org/whl/cu121/torch_stable.html
 
 # Set the working directory
 WORKDIR /app
