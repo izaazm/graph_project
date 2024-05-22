@@ -19,7 +19,7 @@ for (h, r, t) in fact_all:
 			if v in gcc_all:
 				entity.append(v)
 				relation.append(q)
-				qual.append((q, v))
+				qual.append((q, v))s
 		
 		fact.append(((h, r, t), qual))
 	# else:

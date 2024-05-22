@@ -16,7 +16,6 @@ def parse(test=False):
     parser.add_argument('-hdr_r', '--hidden_dimension_ratio_relation', default = 4, type = int)
     parser.add_argument('-b', '--num_bin', default = 10, type = int)
     parser.add_argument('-e', '--num_epoch', default = 10000, type = int)
-    parser.add_argument('-cd', '--clean_data', default = False, type = bool)
     parser.add_argument('-sp', '--special_relation', default = True, type = bool)
     if test:
         parser.add_argument('--target_epoch', default = 6600, type = int)
