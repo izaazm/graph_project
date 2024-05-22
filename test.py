@@ -61,10 +61,12 @@ InGram_qual.eval()
 test_msg_triplet = test_triplet.msg_triplets
 test_sup_triplet = test_triplet.sup_triplets
 test_triplet_relation_triplets = generate_relation_triplets(test_msg_triplet, test_triplet.num_ent, test_triplet.num_rel, B)
+test_triplet_relation_triplets = torch.tensor(test_triplet_relation_triplets).cuda()
 
 test_msg_qual = test_triplet.msg_triplets
 test_sup_qual = test_triplet.sup_triplets
 test_qual_relation_triplets = generate_relation_triplets(test_msg_qual, test_qual.num_ent, test_qual.num_rel, B)
+test_qual_relation_triplets = torch.tensor(test_qual_relation_triplets).cuda()
 
 test_triplet_init_emb_ent = torch.load(f"ckpt/{args.exp}/{args.data_name}/{file_format}_best_triplet.ckpt")["inf_emb_ent"]
 test_triplet_init_emb_rel = torch.load(f"ckpt/{args.exp}/{args.data_name}/{file_format}_best_triplet.ckpt")["inf_emb_rel"]
@@ -77,9 +79,6 @@ test_triplet_msg = torch.tensor(test_msg_triplet).cuda()
 
 test_qual_sup = torch.tensor(test_sup_qual).cuda()
 test_qual_msg = torch.tensor(test_msg_qual).cuda()
-
-test_triplet_relation_triplets = torch.tensor(test_triplet_relation_triplets).cuda()
-test_qual_relation_triplets = torch.tensor(test_qual_relation_triplets).cuda()
 
 ranks_triplet = evaluate(InGram_triplet, test_triplet, test_triplet_init_emb_ent, test_triplet_init_emb_rel, test_triplet_relation_triplets)
 ranks_qual = evaluate(InGram_qual, test_qual, test_qual_init_emb_ent, test_qual_init_emb_rel, test_qual_relation_triplets)
