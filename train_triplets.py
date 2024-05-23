@@ -81,7 +81,7 @@ for epoch in pbar:
 		ingram_trip.eval()
 		val_init_emb_ent, val_init_emb_rel, val_relation_triplets = initialize(valid, valid.msg_triplets, \
 																				d_e, d_r, B)
-		print(val_init_emb_ent, )
+
 		ranks = evaluate(ingram_trip, valid, val_init_emb_ent, val_init_emb_rel, val_relation_triplets)
 		print_metrics(f"Validation Triplets Epoch {epoch + 1}", ranks)
 		_, mrr, _, _, _ = get_metrics(ranks)
