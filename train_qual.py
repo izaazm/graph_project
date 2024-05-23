@@ -83,7 +83,7 @@ for epoch in pbar:
 		val_init_emb_ent, val_init_emb_rel, val_relation_triplets = initialize(valid, valid.msg_triplets, \
 																				d_e, d_r, B)
 
-		ranks = evaluate(ingram_qual, valid, epoch, val_init_emb_ent, val_init_emb_rel, val_relation_triplets)
+		ranks = evaluate(ingram_qual, valid, epoch, val_init_emb_ent, val_init_emb_rel, val_relation_triplets, qual=True)
 		print_metrics(f"Validation Qual Epoch {epoch + 1}", ranks)
 		_, mrr, _, _, _ = get_metrics(ranks)
 
