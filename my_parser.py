@@ -22,20 +22,9 @@ def parse(test=False):
     parser.add_argument('-v', '--validation_epoch', default = 200, type = int)
     parser.add_argument('--num_head', default = 8, type = int)
     parser.add_argument('--num_neg', default = 10, type = int)
-    parser.add_argument('--best', action = 'store_true')
     if not test:
         parser.add_argument('--no_write', action = 'store_true')
 
     args = parser.parse_args()
-
-    if test and args.best:
-        remaining_args = []
-        with open(f"./ckpt/best/{args.data_name}/config.json") as f:
-            configs = json.load(f)
-        for key in vars(args).keys():
-            if key in configs:
-                vars(args)[key] = configs[key]
-            else:
-                remaining_args.append(key)
 
     return args

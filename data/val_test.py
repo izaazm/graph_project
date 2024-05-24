@@ -1,8 +1,10 @@
 # split validation and test from kg_inference
-import igraph
 import os
+import json
 import random
 import argparse
+import igraph
+from utils import read_HKG
 
 parser = argparse.ArgumentParser()
 parser.add_argument('data')
@@ -21,22 +23,25 @@ test_r2ht = {}
 test_q = {}
 test_hcon = {}
 test_tcon = {}
-with open(f"./{full_data}/kg_inference.txt") as f:
-    for line in f.readlines():
-        h,r,t = line.strip().split()
-        test.append((h,r,t))
-        if r in test_r2ht:
-            test_r2ht[r].append((h,t))
-        else:
-            test_r2ht[r] = [(h,t)]
-        if (h,'_',t) in test_q:
-            test_q[(h,'_',t)].append(r)
-        else:
-            test_q[(h,'_',t)] = [r]
-        test_rel.add(r)
-        test_graph.append((h,t))
+
+_, _, _, fact_all = read_HKG(f"{full_data}/kg_inference.json")
+
+for fact in fact_all:
+    h, r, t = fact
+    test.append((h, r, t))
+    if r in test_r2ht:
+        test_r2ht[r].append((h, t))
+    else:
+        test_r2ht[r] = [(h, t)]
+    if (h, '_', t) in test_q:
+        test_q[(h, '_', t)].append(r)
+    else:
+        test_q[(h, '_', t)] = [r]
+    test_rel.add(r)
+    test_graph.append((h, t))
 G_test = igraph.Graph.TupleList(test_graph, directed = True)
 spanning_test = G_test.spanning_tree()
+print(spanning_test)
 
 num_test = len(test)
 test_msg = set()
@@ -46,14 +51,14 @@ for e in spanning_test.es:
     h,t = e.tuple
     h = spanning_test.vs[h]["name"]
     t = spanning_test.vs[t]["name"]
-    r = random.choice(test_q[(h,'_',t)])
+    r = random.choice(test_q[(h, '_', t)])
     test_msg.add((h, r, t))
     test_rel.discard(r)
-    test.discard((h,r,t))
+    test.discard((h, r, t))
 for r in test_rel:
     h,t = random.choice(test_r2ht[r])
-    test_msg.add((h,r,t))
-    test.discard((h,r,t))
+    test_msg.add((h, r, t))
+    test.discard((h, r, t))
 left_test = sorted(list(test))
 test_msg = sorted(list(test_msg))
 random.shuffle(left_test)
@@ -61,15 +66,36 @@ remainings = int(num_test * 0.6) - len(test_msg)
 test_msg += left_test[:remainings]
 left_test = left_test[remainings:]
 
-final_valid = left_test[:len(left_test)//2]
-final_test = left_test[len(left_test)//2:]
+final_valid = left_test[:len(left_test) // 2]
+final_test = left_test[len(left_test) // 2:]
 
-with open(f"{full_data}/msg.txt", "w") as f:
-    for h,r,t in test_msg:
-        f.write(f"{h}\t{r}\t{t}\n")
-with open(f"{full_data}/valid.txt", "w") as f:
-    for h,r,t in final_valid:
-        f.write(f"{h}\t{r}\t{t}\n")
-with open(f"{full_data}/test.txt", "w") as f:
-    for h,r,t in final_test:
-        f.write(f"{h}\t{r}\t{t}\n")
+with open(f"{full_data}/msg.json", "w") as f:
+    for h, r, t in test_msg:
+        n = 2
+        fact = dict()
+        fact[r] = [h, t]
+        for q, v in fact_all[(h, r, t)]:
+            fact[q] = v
+            n += 1
+        fact["N"] = n
+        f.write(json.dumps(fact) + '\n')
+with open(f"{full_data}/valid.json", "w") as f:
+    for h, r, t in final_valid:
+        n = 2
+        fact = dict()
+        fact[r] = [h, t]
+        for q, v in fact_all[(h, r, t)]:
+            fact[q] = v
+            n += 1
+        fact["N"] = n
+        f.write(json.dumps(fact) + '\n')
+with open(f"{full_data}/test.json", "w") as f:
+    for h, r, t in final_test:
+        n = 2
+        fact = dict()
+        fact[r] = [h, t]
+        for q, v in fact_all[(h, r, t)]:
+            fact[q] = v
+            n += 1
+        fact["N"] = n
+        f.write(json.dumps(fact) + '\n')

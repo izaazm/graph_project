@@ -1,11 +1,10 @@
-from relgraph import generate_relation_triplets
 from dataset import TrainData, TestNewData
 from tqdm import tqdm
 import random
 from model import InGram
 import torch
 import numpy as np
-from utils import generate_neg, initialize
+from utils import generate_neg, initialize, print_metrics, get_metrics
 import os
 from evaluation import evaluate
 from my_parser import parse
@@ -53,7 +52,8 @@ loss_fn = torch.nn.MarginRankingLoss(margin = args.margin, reduction = 'mean')
 optimizer = torch.optim.Adam(ingram_qual.parameters(), lr = args.learning_rate)
 pbar = tqdm(range(epochs))
 
-total_loss = 0
+losses = []
+best_mrr = 0
 
 for epoch in pbar:
 	ingram_qual.train()
@@ -73,8 +73,8 @@ for epoch in pbar:
 	loss.backward()
 	torch.nn.utils.clip_grad_norm_(ingram_qual.parameters(), 0.1, error_if_nonfinite = False)
 	optimizer.step()
-	total_loss += loss.item()
 	pbar.set_description(f"loss {loss.item()}")	
+	losses.append(loss.item())
 
 	if ((epoch + 1) % valid_epochs) == 0:
 		print("Validation")
@@ -82,11 +82,16 @@ for epoch in pbar:
 		val_init_emb_ent, val_init_emb_rel, val_relation_triplets = initialize(valid, valid.msg_triplets, \
 																				d_e, d_r, B)
 
-		evaluate(ingram_qual, valid, epoch, val_init_emb_ent, val_init_emb_rel, val_relation_triplets)
+		ranks = evaluate(ingram_qual, valid, val_init_emb_ent, val_init_emb_rel, val_relation_triplets, qual=True)
+		print_metrics(f"Validation Qual Epoch {epoch + 1}", ranks)
+		_, mrr, _, _, _ = get_metrics(ranks)
 
-		if not args.no_write:
+		if not args.no_write and mrr > best_mrr:
 			torch.save({'model_state_dict': ingram_qual.state_dict(), \
 						'optimizer_state_dict': optimizer.state_dict(), \
 						'inf_emb_ent': val_init_emb_ent, \
 						'inf_emb_rel': val_init_emb_rel}, \
-				f"ckpt/{args.exp}/{args.data_name}/{file_format}_{epoch+1}.ckpt")
+				f"ckpt/{args.exp}/{args.data_name}/{file_format}_best_qual.ckpt")
+
+losses = np.array(losses)
+np.save(f"ckpt/{args.exp}/{args.data_name}/{file_format}_losses.npy", losses)

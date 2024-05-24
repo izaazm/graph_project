@@ -141,6 +141,8 @@ class TrainData():
 			msg.append((h, r, t))
 			remaining_triplet_indexes[self.triplet2idx[(h,r,t)]] = 0
 
+		# TODO: cek ini diganti apa ngga
+		# harus diganti kah ini
 		sup = [self.triplets[idx] for idx, tf in enumerate(remaining_triplet_indexes) if tf]
 		
 		msg = np.array(msg)
@@ -232,9 +234,9 @@ class TestNewData():
 	def process_triplet(self):
 		total_triplets = []
 		id2ent, id2rel, msg_triplets, sup_triplets = [], [], [], []
-		id2ent_msg, id2rel_msg, id2trp_msg, fact_msg = self.read_fact("/msg")
-		id2ent_val, id2rel_val, id2trp_val, fact_val = self.read_fact("/valid")
-		id2ent_test, id2rel_test, id2trp_test, fact_test = self.read_fact("/test")
+		_, _, id2trp_msg, fact_msg = self.read_fact("/msg")
+		_, _, id2trp_val, fact_val = self.read_fact("/valid")
+		_, _, id2trp_test, fact_test = self.read_fact("/test")
 		id2trp = remove_duplicate(id2trp_msg + id2trp_val + id2trp_test)
 
 		if self.qual:
@@ -289,6 +291,8 @@ class TestNewData():
 			msg_triplets = [(self.ent2id[h], self.rel2id[r], self.ent2id[t]) for h, r, t in msg_triplets]
 			msg_inv_triplets = [(t, r+num_rel, h) for h,r,t in msg_triplets]
 
+			# TODO: cek ini diganti apa ngga
+			# harus diganti kah ini
 			if self.data_type == "valid":
 				for h, r, t in id2trp_val:
 					sup_triplets.append((self.ent2id[h], self.rel2id[r], self.ent2id[t]))
@@ -303,11 +307,12 @@ class TestNewData():
 		filter_dict = {}
 		for triplet in total_triplets:
 			h, r, t = triplet
-			if ('_', self.rel2id[r], self.ent2id[t]) not in filter_dict:
-				filter_dict[('_', self.rel2id[r], self.ent2id[t])] = [self.ent2id[h]]
-			else:
-				filter_dict[('_', self.rel2id[r], self.ent2id[t])].append(self.ent2id[h])
-
+			if not self.qual:
+				if ('_', self.rel2id[r], self.ent2id[t]) not in filter_dict:
+					filter_dict[('_', self.rel2id[r], self.ent2id[t])] = [self.ent2id[h]]
+				else:
+					filter_dict[('_', self.rel2id[r], self.ent2id[t])].append(self.ent2id[h])
+			
 			if (self.ent2id[h], '_', self.ent2id[t]) not in filter_dict:
 				filter_dict[(self.ent2id[h], '_', self.ent2id[t])] = [self.rel2id[r]]
 			else:

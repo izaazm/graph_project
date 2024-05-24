@@ -79,10 +79,22 @@ def get_rank(triplet, scores, filters, target = 0):
 	return rank.item()
 
 def get_metrics(rank):
-	rank = np.array(rank, dtype = np.int)
+	rank = np.array(rank, dtype = np.int64)
 	mr = np.mean(rank)
 	mrr = np.mean(1 / rank)
 	hit10 = np.sum(rank < 11) / len(rank)
 	hit3 = np.sum(rank < 4) / len(rank)
 	hit1 = np.sum(rank < 2) / len(rank)
 	return mr, mrr, hit10, hit3, hit1
+
+def print_metrics(title, ranks):
+	print()
+	print(f"--------{title}--------")
+	mr, mrr, hit10, hit3, hit1 = get_metrics(ranks)
+	print(f"MR: {mr:.1f}")
+	print(f"MRR: {mrr:.3f}")
+	print(f"Hits@10: {hit10:.3f}")
+	print(f"Hits@3: {hit3:.3f}")
+	print(f"Hits@1: {hit1:.3f}")
+	print("------------------------")
+	print()
