@@ -59,10 +59,17 @@ def check_no_overlap(x, y):
 	assert len(set(x).intersection(set(y))) == 0
 	print("Done: Check no overlap")
 
-def write(path, x):
-	with open(path, 'w') as f:
-		for h, r, t in x:
-			f.write(f"{h}\t{r}\t{t}\n")
+def write(path, facts):
+	with open(path, "w") as f:
+		for h, r, t in facts:
+			n = 2
+			fact = dict()
+			fact[r] = [h, t]
+			for q, v in facts[(h, r, t)]:
+				fact[q] = v
+				n += 1
+			fact["N"] = n
+			f.write(json.dumps(fact) + '\n')
 
 def gather_neighbor(triplet, x, thr):
 	res = []
@@ -76,11 +83,11 @@ def gather_neighbor(triplet, x, thr):
 		res = random.sample(res, thr)
 	return res
 
-def sample_2hop(facts, x, thr):
+def sample_2hop(triplet, x, thr):
 	sample = set()
 	for e in x:
 		neighbor = set([e])
-		neighbor_1hop = gather_neighbor(facts, e, thr)
+		neighbor_1hop = gather_neighbor(triplet, e, thr)
 		neighbor = neighbor.union(set(neighbor_1hop))
 
 		for e1 in neighbor_1hop:
@@ -101,15 +108,10 @@ def merge(x, y, p):
 		random.shuffle(y)
 		return x[:int(num_tot * (1 - p))] + y[:int(num_tot * p)]
 
-def gcc(facts):
+def gcc(triplet):
 	edge = []
-	for (h, r, t) in facts:
+	for h, r, t in triplet:
 		edge.append((h, t))
-		for qual in facts[(h, r, t)]:
-			_, v = qual
-			edge.append((h, v))
-			edge.append((t, v))
-
 	G = nx.Graph()
 	G.add_edges_from(edge)
 	largest_cc = max(nx.connected_components(G), key=len)

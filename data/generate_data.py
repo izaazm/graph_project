@@ -1,4 +1,4 @@
-# Generate new knowledge graph of test and inference (kg_inference)
+### Generate new knowledge graph ###
 from utils import *
 import argparse
 import random
@@ -20,30 +20,20 @@ seed = int(100 * args.n_train * args.n_test / args.p_rel * args.seed)
 random.seed(seed)
 
 ### Read entities/relations ###
-_, _, _, fact_all = read_HKG(f"{args.data_src}.json")
+_, _, triplet_all, facts_all = read_HKG(f"{args.data_src}.json")
 
 ### Take GCC ###
-gcc_all = gcc(fact_all)
-entity, relation, triplet, fact = [], [], [], []
-for (h, r, t) in fact_all:
+gcc_all = gcc(triplet_all)
+entity, relation, triplet = [], [], []
+for h, r, t in triplet_all:
 	if h in gcc_all:
 		entity.append(h)
 		entity.append(t)
 		relation.append(r)
 		triplet.append((h, r, t))
 
-		qual = []
-		for (q, v) in fact_all[(h, r, t)]:
-			if v in gcc_all:
-				entity.append(v)
-				relation.append(q)
-				qual.append((q, v))
-		
-		fact.append(((h, r, t), qual)) 
-
 entity = remove_duplicate(entity)
 relation = remove_duplicate(relation)
-facts = remove_duplicate_facts(fact)
 
 ### Split relation set into train/valid/test ###
 num_relation = len(relation)
@@ -56,7 +46,7 @@ relation_train = set(relation_train)
 
 ### Sample neighbors from train seeds ###
 seed_train = random.sample(entity, args.n_train)
-entity_train = sample_2hop(facts, seed_train, 50)
+entity_train = sample_2hop(triplet, seed_train, 50)
 
 ### Generate train set ###
 train_all = []
@@ -106,12 +96,21 @@ random.shuffle(test)
 ### Check no overlap ###
 check_no_overlap(gcc_train, gcc_test)
 
-print("Number of triplets in Train KG:", len(train))
-print("Number of triplets in Inference KG:", len(test))
+### Reconstruct facts ###
+train_facts = dict()
+for h, r, t in train:
+	train_facts[(h, r, t)] = facts_all[(h, r, t)]
+
+test_facts = dict()
+for h, r, t in test:
+	test_facts[(h, r, t)] = facts_all[(h, r, t)]
+
+print("Number of facts in Train KG:", len(train_facts))
+print("Number of facts in Inference KG:", len(test_facts))
 
 ### Save files ###
 if not args.no_save:
 	save_dir = f"./{args.data_tgt}/"
 	os.makedirs(save_dir, exist_ok=True)
-	write(save_dir + 'train.txt', train)
-	write(save_dir + 'kg_inference.txt', test) 
+	write(save_dir + 'train.json', train_facts)
+	write(save_dir + 'kg_inference.json', test_facts)

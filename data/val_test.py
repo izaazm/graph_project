@@ -41,7 +41,6 @@ for fact in fact_all:
     test_graph.append((h, t))
 G_test = igraph.Graph.TupleList(test_graph, directed = True)
 spanning_test = G_test.spanning_tree()
-print(spanning_test)
 
 num_test = len(test)
 test_msg = set()
@@ -69,6 +68,10 @@ left_test = left_test[remainings:]
 final_valid = left_test[:len(left_test) // 2]
 final_test = left_test[len(left_test) // 2:]
 
+print("Number of facts in message KG:", len(test_msg))
+print("Number of facts in validation KG:", len(final_valid))
+print("Number of facts in test KG:", len(final_test))
+
 with open(f"{full_data}/msg.json", "w") as f:
     for h, r, t in test_msg:
         n = 2
@@ -79,6 +82,7 @@ with open(f"{full_data}/msg.json", "w") as f:
             n += 1
         fact["N"] = n
         f.write(json.dumps(fact) + '\n')
+
 with open(f"{full_data}/valid.json", "w") as f:
     for h, r, t in final_valid:
         n = 2
@@ -89,6 +93,7 @@ with open(f"{full_data}/valid.json", "w") as f:
             n += 1
         fact["N"] = n
         f.write(json.dumps(fact) + '\n')
+
 with open(f"{full_data}/test.json", "w") as f:
     for h, r, t in final_test:
         n = 2
