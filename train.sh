@@ -1,2 +1,2 @@
 #!/bin/sh
-python3 train_triplets.py --data_path ./data_dummy/ --data_name dummy  
+python3 train_triplets.py --data_path ./data/ --data_name JF17K_25

@@ -41,6 +41,7 @@ for fact in fact_all:
     test_graph.append((h, t))
 G_test = igraph.Graph.TupleList(test_graph, directed = True)
 spanning_test = G_test.spanning_tree()
+print(spanning_test)
 
 num_test = len(test)
 test_msg = set()
