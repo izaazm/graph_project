@@ -20,6 +20,7 @@ seed = int(100 * args.n_train * args.n_test / args.p_rel * args.seed)
 random.seed(seed)
 
 ### Read entities/relations ###
+print(f"PROCESSING {args.data_src}")
 _, _, triplet_all, facts_all = read_HKG(f"{args.data_src}.json")
 
 ### Take GCC ###
@@ -107,6 +108,7 @@ for h, r, t in test:
 
 print("Number of facts in Train KG:", len(train_facts))
 print("Number of facts in Inference KG:", len(test_facts))
+print("\n")
 
 ### Save files ###
 if not args.no_save:
