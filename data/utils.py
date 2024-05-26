@@ -16,7 +16,6 @@ def remove_duplicate_facts(facts):
 	
 	for triplets in facts_dict:
 		facts_dict[triplets] = remove_duplicate(facts_dict[triplets])
-
 	return facts_dict
 	
 
@@ -30,19 +29,26 @@ def read_HKG(path):
 		for line in f.readlines():
 			cur_fact = json.loads(line)
 			qual = []
+			valid = False
 			for i, rel in enumerate(cur_fact):
 				if i == 0:
 					r = rel
-					h, t = cur_fact[rel]
+					if len(cur_fact[rel]) == 2:
+						h, t = cur_fact[rel]
+						valid = True
 				elif rel != "N":
 					relation.append(rel)
-					qual.append((rel, cur_fact[rel]))
-
-			entity.append(h)
-			entity.append(t)
-			relation.append(r)
-			triplet.append((h, r, t))
-			facts.append(((h, r, t), qual))
+					if isinstance(cur_fact[rel], list):
+						qual.append((rel, cur_fact[rel][0]))
+					elif isinstance(cur_fact[rel], str):
+						qual.append((rel, cur_fact[rel]))
+			
+			if valid:
+				entity.append(h)
+				entity.append(t)
+				relation.append(r)
+				triplet.append((h, r, t))
+				facts.append(((h, r, t), qual))
 
 	return remove_duplicate(entity), remove_duplicate(relation), remove_duplicate(triplet), remove_duplicate_facts(facts)
 

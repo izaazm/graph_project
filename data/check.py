@@ -11,7 +11,7 @@ args = parser.parse_args()
 full_data = args.data
 if full_data not in os.listdir():
     raise ValueError
-print(f"CHECKING {full_data}\n")
+print(f"\nCHECKING {full_data}")
 
 def intersection(set1, set2):
     return set1 & set2
@@ -65,4 +65,3 @@ print(f"Number of relations in inference: {len(relation_inference)}")
 print("\n")
 print(f"Number of facts with new relation: {num_fact_new_relation}")
 print(f"Percentage of facts with new relation: {percent_fact_new_relation}")
-
