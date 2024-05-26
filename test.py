@@ -27,12 +27,12 @@ path = args.data_path + args.data_name + "/"
 test_triplet = TestNewData(path, data_type = "test", qual = False, special_relation=args.special_relation)
 test_qual = TestNewData(path, data_type = "test", qual = True, special_relation=args.special_relation)
 
-if not args.best:
-	file_format = f"lr_{args.learning_rate}_dim_{args.dimension_entity}_{args.dimension_relation}" + \
-				f"_bin_{args.num_bin}_total_{args.num_epoch}_every_{args.validation_epoch}" + \
-				f"_neg_{args.num_neg}_layer_{args.num_layer_ent}_{args.num_layer_rel}" + \
-				f"_hid_{args.hidden_dimension_ratio_entity}_{args.hidden_dimension_ratio_relation}" + \
-				f"_head_{args.num_head}_margin_{args.margin}"
+
+file_format = f"lr_{args.learning_rate}_dim_{args.dimension_entity}_{args.dimension_relation}" + \
+			f"_bin_{args.num_bin}_total_{args.num_epoch}_every_{args.validation_epoch}" + \
+			f"_neg_{args.num_neg}_layer_{args.num_layer_ent}_{args.num_layer_rel}" + \
+			f"_hid_{args.hidden_dimension_ratio_entity}_{args.hidden_dimension_ratio_relation}" + \
+			f"_head_{args.num_head}_margin_{args.margin}"
 
 d_e = args.dimension_entity
 d_r = args.dimension_relation
@@ -63,8 +63,8 @@ test_sup_triplet = test_triplet.sup_triplets
 test_triplet_relation_triplets = generate_relation_triplets(test_msg_triplet, test_triplet.num_ent, test_triplet.num_rel, B)
 test_triplet_relation_triplets = torch.tensor(test_triplet_relation_triplets).cuda()
 
-test_msg_qual = test_triplet.msg_triplets
-test_sup_qual = test_triplet.sup_triplets
+test_msg_qual = test_qual.msg_triplets
+test_sup_qual = test_qual.sup_triplets
 test_qual_relation_triplets = generate_relation_triplets(test_msg_qual, test_qual.num_ent, test_qual.num_rel, B)
 test_qual_relation_triplets = torch.tensor(test_qual_relation_triplets).cuda()
 

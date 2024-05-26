@@ -307,11 +307,10 @@ class TestNewData():
 		filter_dict = {}
 		for triplet in total_triplets:
 			h, r, t = triplet
-			if not self.qual:
-				if ('_', self.rel2id[r], self.ent2id[t]) not in filter_dict:
-					filter_dict[('_', self.rel2id[r], self.ent2id[t])] = [self.ent2id[h]]
-				else:
-					filter_dict[('_', self.rel2id[r], self.ent2id[t])].append(self.ent2id[h])
+			if ('_', self.rel2id[r], self.ent2id[t]) not in filter_dict:
+				filter_dict[('_', self.rel2id[r], self.ent2id[t])] = [self.ent2id[h]]
+			else:
+				filter_dict[('_', self.rel2id[r], self.ent2id[t])].append(self.ent2id[h])
 			
 			if (self.ent2id[h], '_', self.ent2id[t]) not in filter_dict:
 				filter_dict[(self.ent2id[h], '_', self.ent2id[t])] = [self.rel2id[r]]
