@@ -11,7 +11,6 @@ class TrainData():
 	def __init__(self, path, qual=False, clean_data=True, special_relation=True):
 		self.path = path
 		self.qual = qual
-		self.clean_data = clean_data
 		self.special_relation = special_relation
 		self.rel_info = {}
 		self.pair_info = {}
@@ -20,81 +19,79 @@ class TrainData():
 		self.ent2id = None
 		self.rel2id = None
 		self.trp2id = None
-		self.id2ent, self.id2rel, self.id2trp, self.triplets = self.read_fact(path + '/train.json')
+		self.id2ent, self.id2rel, self.id2trp, self.triplets = self.read_triplet()
 		self.num_triplets = len(self.triplets)
 		self.num_ent, self.num_rel = len(self.id2ent), len(self.id2rel)
-		
-	def read_fact(self, path):
-		_, _, _, fact_all = read_HKG(path)
+
+	def read_fact(self, file):			
+		_, _, _, fact_all = read_HKG(self.path + file + ".json")
 		id2ent, id2rel, id2trp = [], [], []
 		for fact in fact_all:
 			h, r, t = fact
-			id2trp.append((h, r, t))
-
-		if self.qual and self.special_relation:
-			sp_rel = "SPECIAL_RELATION"
-			id2rel.append(sp_rel)
-
-		# create new triplets
-		id2trp = remove_duplicate(id2trp)
-		self.trp2id = {trp: idx for idx, trp in enumerate(id2trp)}
-		triplets = []
-		if self.qual:
-			for fact1 in fact_all:
-				h1, r1, t1 = fact1
-				triplet1_ent = f"TRIPLET_{self.trp2id[fact1]}"
-				# check for triplet-triplet relation 
-				for fact2 in fact_all:
-					h2, r2, t2 = fact2
-					triplet2_ent = f"TRIPLET_{self.trp2id[fact2]}"
-					if t1 == h2:
-						if self.special_relation:
-							triplets.append((triplet1_ent, sp_rel, triplet2_ent))
-						else:
-							rel = f"ENTITY_{t1}"
-							triplets.append((triplet1_ent, rel, triplet2_ent))
-							id2rel.append(rel)
-					elif t2 == h1:
-						if self.special_relation:
-							triplets.append((triplet2_ent, sp_rel, triplet1_ent))
-						else:
-							rel = f"ENTITY_{t2}"
-							triplets.append((triplet2_ent, rel, triplet1_ent))
-							id2rel.append(rel)				
-				# check for triplet-qualifier relation
-				for q, v in fact_all[fact1]:
-					triplets.append((triplet1_ent, q, v))
-		else:
-			for fact in fact_all:
-				h, r, t = fact
-				triplets.append((h, r, t))
-
-		triplets = remove_duplicate(triplets)
-
-		# removing unnecessary triplets
-		id2ent = []
-		id2rel = []
-		node_indegree = {}
-		node_outdegree = {}
-		for trp in triplets:
-			h, r, t = trp
-			if h not in node_outdegree:
-				node_outdegree[h] = 1
-			else:
-				node_outdegree[h] += 1
-			if t not in node_indegree:
-				node_indegree[t] = 1
-			else:
-				node_indegree[t] += 1
 			id2ent.append(h)
 			id2ent.append(t)
 			id2rel.append(r)
+			id2trp.append((h, r, t))
+			if self.qual:
+				for (q, v) in fact_all[(h, r, t)]:
+					id2ent.append(v)
+					id2rel.append(q)
 
-		print(f"highest outdegree: {max(node_outdegree, key=node_outdegree.get)} {max(node_outdegree.values())}")
-		print(f"highest indegree: {max(node_indegree, key=node_indegree.get)} {max(node_indegree.values())}")
+		return id2ent, id2rel, id2trp, fact_all 
 
-		id2ent = remove_duplicate(id2ent)
-		id2rel = remove_duplicate(id2rel)
+	def clean_data(self, triplets):
+		id2ent = []
+		id2rel = []
+		for trp in triplets:
+			h, r, t = trp
+			id2ent.append(h)
+			id2ent.append(t)
+			id2rel.append(r)
+		return id2ent, id2rel
+
+	def fact_to_triplet(self, trp2id, fact):
+		new_triplets, new_entities, new_relations = [], [], []
+		if self.special_relation:
+			sp_rel = "SPECIAL_RELATION"
+			new_relations.append(sp_rel)
+
+		
+		for fact1 in fact:
+			h1, r1, t1 = fact1
+			triplet1_ent = f"TRIPLET_{trp2id[fact1]}"
+			# check for triplet-triplet relation 
+			for fact2 in fact:
+				h2, r2, t2 = fact2
+				triplet2_ent = f"TRIPLET_{trp2id[fact2]}"
+				if t1 == h2:
+					if self.special_relation:
+						new_triplets.append((triplet1_ent, sp_rel, triplet2_ent))
+					else:
+						rel = f"ENTITY_{t1}"
+						new_triplets.append((triplet1_ent, rel, triplet2_ent))
+						new_relations.append(rel)			
+			new_entities.append(triplet1_ent)
+			# check for triplet-qualifier relation
+			for q, v in fact[fact1]:
+				new_triplets.append((triplet1_ent, q, v))
+			
+		return new_entities, new_relations, new_triplets	
+
+
+	def read_triplet(self):
+		id2ent, id2rel, triplets = [], [], []
+		_, _, id2trp, fact_all = self.read_fact("/train")
+		id2trp = remove_duplicate(id2trp)
+
+		if self.qual:
+			trp2id = {trp: idx for idx, trp in enumerate(id2trp)}
+			_, _, triplets = self.fact_to_triplet(trp2id, fact_all)
+		else:
+			for h, r, t in id2trp:
+				triplets.append((h, r, t))
+
+		triplets = remove_duplicate(triplets)
+		id2ent, id2rel = self.clean_data(triplets)
 		random.shuffle(id2ent)
 		random.shuffle(id2rel)
 		self.ent2id = {ent: idx for idx, ent in enumerate(id2ent)}
@@ -176,7 +173,6 @@ class TestNewData():
 		self.num_ent, self.num_rel = len(self.id2ent), len(self.id2rel)
 
 	def read_fact(self, file):			
-		triplet = []
 		_, _, _, fact_all = read_HKG(self.path + file + ".json")
 		id2ent, id2rel, id2trp = [], [], []
 		for fact in fact_all:
@@ -221,14 +217,7 @@ class TestNewData():
 					else:
 						rel = f"ENTITY_{t1}"
 						new_triplets.append((triplet1_ent, rel, triplet2_ent))
-						new_relations.append(rel)
-				if t2 == h1:
-					if self.special_relation:
-						new_triplets.append((triplet2_ent, sp_rel, triplet1_ent))
-					else:
-						rel = f"ENTITY_{t2}"
-						new_triplets.append((triplet2_ent, rel, triplet1_ent))
-						new_relations.append(rel)				
+						new_relations.append(rel)			
 			new_entities.append(triplet1_ent)
 			# check for triplet-qualifier relation
 			for q, v in fact[fact1]:
@@ -249,8 +238,13 @@ class TestNewData():
 			_, _, new_msg_triplets = self.fact_to_triplet(trp2id, fact_msg)	
 			_, _, new_val_triplets = self.fact_to_triplet(trp2id, fact_val)
 			_, _, new_test_triplets = self.fact_to_triplet(trp2id, fact_test)
+			new_msg_triplets = remove_duplicate(new_msg_triplets)
+			new_val_triplets = remove_duplicate(new_val_triplets)
+			new_test_triplets = remove_duplicate(new_test_triplets)
 
 			total_triplets = new_msg_triplets + new_val_triplets + new_test_triplets
+			total_triplets = remove_duplicate(total_triplets)
+
 			msg_triplets = new_msg_triplets
 			id2ent, id2rel = self.clean_data(total_triplets)
 			id2ent = remove_duplicate(id2ent)
@@ -272,8 +266,9 @@ class TestNewData():
 					assert (self.ent2id[h], self.rel2id[r], self.ent2id[t]) not in msg_triplets, (self.ent2id[h], self.rel2id[r], self.ent2id[t])
 			elif self.data_type == "test":
 				for h, r, t in new_test_triplets:
-					sup_triplets.append((self.ent2id[h], self.rel2id[r], self.ent2id[t]))
-					assert (self.ent2id[h], self.rel2id[r], self.ent2id[t]) not in msg_triplets, (self.ent2id[h], self.rel2id[r], self.ent2id[t])
+					if not t.startswith("TRIPLET"):
+						sup_triplets.append((self.ent2id[h], self.rel2id[r], self.ent2id[t]))
+						assert (self.ent2id[h], self.rel2id[r], self.ent2id[t]) not in msg_triplets, (self.ent2id[h], self.rel2id[r], self.ent2id[t])
 			else:
 				raise ValueError("Data type value is not valid or test")
 		else:
@@ -317,7 +312,7 @@ class TestNewData():
 			if ('_', self.rel2id[r], self.ent2id[t]) not in filter_dict:
 				filter_dict[('_', self.rel2id[r], self.ent2id[t])] = [self.ent2id[h]]
 			else:
-					filter_dict[('_', self.rel2id[r], self.ent2id[t])].append(self.ent2id[h])
+				filter_dict[('_', self.rel2id[r], self.ent2id[t])].append(self.ent2id[h])
 			
 			if (self.ent2id[h], '_', self.ent2id[t]) not in filter_dict:
 				filter_dict[(self.ent2id[h], '_', self.ent2id[t])] = [self.rel2id[r]]
