@@ -292,8 +292,6 @@ class TestNewData():
 			msg_triplets = [(self.ent2id[h], self.rel2id[r], self.ent2id[t]) for h, r, t in msg_triplets]
 			msg_inv_triplets = [(t, r+num_rel, h) for h,r,t in msg_triplets]
 
-			# TODO: cek ini diganti apa ngga
-			# harus diganti kah ini
 			if self.data_type == "valid":
 				for h, r, t in id2trp_val:
 					sup_triplets.append((self.ent2id[h], self.rel2id[r], self.ent2id[t]))
