@@ -30,10 +30,6 @@ class TrainData():
 		for fact in fact_all:
 			h, r, t = fact
 			id2trp.append((h, r, t))
-			if self.qual:
-				for (q, v) in fact_all[(h, r, t)]:
-					id2ent.append(v)
-					id2rel.append(q)
 
 		if self.qual and self.special_relation:
 			sp_rel = "SPECIAL_RELATION"
@@ -58,14 +54,13 @@ class TrainData():
 							rel = f"ENTITY_{t1}"
 							triplets.append((triplet1_ent, rel, triplet2_ent))
 							id2rel.append(rel)
-					if t2 == h1:
+					elif t2 == h1:
 						if self.special_relation:
 							triplets.append((triplet2_ent, sp_rel, triplet1_ent))
 						else:
 							rel = f"ENTITY_{t2}"
 							triplets.append((triplet2_ent, rel, triplet1_ent))
 							id2rel.append(rel)				
-				id2ent.append(triplet1_ent)
 				# check for triplet-qualifier relation
 				for q, v in fact_all[fact1]:
 					triplets.append((triplet1_ent, q, v))
@@ -75,14 +70,28 @@ class TrainData():
 				triplets.append((h, r, t))
 
 		triplets = remove_duplicate(triplets)
-		# # removing unnecessary triplets
+
+		# removing unnecessary triplets
 		id2ent = []
 		id2rel = []
+		node_indegree = {}
+		node_outdegree = {}
 		for trp in triplets:
 			h, r, t = trp
+			if h not in node_outdegree:
+				node_outdegree[h] = 1
+			else:
+				node_outdegree[h] += 1
+			if t not in node_indegree:
+				node_indegree[t] = 1
+			else:
+				node_indegree[t] += 1
 			id2ent.append(h)
 			id2ent.append(t)
 			id2rel.append(r)
+
+		print(f"highest outdegree: {max(node_outdegree, key=node_outdegree.get)} {max(node_outdegree.values())}")
+		print(f"highest indegree: {max(node_indegree, key=node_indegree.get)} {max(node_indegree.values())}")
 
 		id2ent = remove_duplicate(id2ent)
 		id2rel = remove_duplicate(id2rel)
@@ -254,10 +263,12 @@ class TestNewData():
 			num_rel = len(self.rel2id)
 			msg_triplets = [(self.ent2id[h], self.rel2id[r], self.ent2id[t]) for h, r, t in msg_triplets]
 			msg_inv_triplets = [(t, r+num_rel, h) for h,r,t in msg_triplets]
-
+			num_qual_triplet = 0
 			if self.data_type == "valid":
 				for h, r, t in new_val_triplets:
-					sup_triplets.append((self.ent2id[h], self.rel2id[r], self.ent2id[t]))
+					if not t.startswith("TRIPLET"):
+						sup_triplets.append((self.ent2id[h], self.rel2id[r], self.ent2id[t]))
+						num_qual_triplet += 1
 					assert (self.ent2id[h], self.rel2id[r], self.ent2id[t]) not in msg_triplets, (self.ent2id[h], self.rel2id[r], self.ent2id[t])
 			elif self.data_type == "test":
 				for h, r, t in new_test_triplets:
@@ -265,7 +276,6 @@ class TestNewData():
 					assert (self.ent2id[h], self.rel2id[r], self.ent2id[t]) not in msg_triplets, (self.ent2id[h], self.rel2id[r], self.ent2id[t])
 			else:
 				raise ValueError("Data type value is not valid or test")
-
 		else:
 			for h, r, t in id2trp_msg:
 				msg_triplets.append((h, r, t))
@@ -303,10 +313,11 @@ class TestNewData():
 		filter_dict = {}
 		for triplet in total_triplets:
 			h, r, t = triplet
+
 			if ('_', self.rel2id[r], self.ent2id[t]) not in filter_dict:
 				filter_dict[('_', self.rel2id[r], self.ent2id[t])] = [self.ent2id[h]]
 			else:
-				filter_dict[('_', self.rel2id[r], self.ent2id[t])].append(self.ent2id[h])
+					filter_dict[('_', self.rel2id[r], self.ent2id[t])].append(self.ent2id[h])
 			
 			if (self.ent2id[h], '_', self.ent2id[t]) not in filter_dict:
 				filter_dict[(self.ent2id[h], '_', self.ent2id[t])] = [self.rel2id[r]]

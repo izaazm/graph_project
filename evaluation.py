@@ -16,15 +16,16 @@ def evaluate(my_model, target, init_emb_ent, init_emb_rel, relation_triplets, qu
         for triplet in tqdm(sup):
             triplet = triplet.unsqueeze(dim = 0)
             
-            head_corrupt = triplet.repeat(target.num_ent, 1)
-            head_corrupt[:,0] = torch.arange(end = target.num_ent)
-            
-            head_scores = my_model.score(emb_ent, emb_rel, head_corrupt)
-            head_filters = target.filter_dict[('_', int(triplet[0,1].item()), int(triplet[0,2].item()))]
-            head_rank = get_rank(triplet, head_scores, head_filters, target = 0)
-            
-            ranks.append(head_rank)
-            head_ranks.append(head_rank)
+            if not qual:
+                head_corrupt = triplet.repeat(target.num_ent, 1)
+                head_corrupt[:,0] = torch.arange(end = target.num_ent)
+                
+                head_scores = my_model.score(emb_ent, emb_rel, head_corrupt)
+                head_filters = target.filter_dict[('_', int(triplet[0,1].item()), int(triplet[0,2].item()))]
+                head_rank = get_rank(triplet, head_scores, head_filters, target = 0)
+                
+                ranks.append(head_rank)
+                head_ranks.append(head_rank)
 
             tail_corrupt = triplet.repeat(target.num_ent, 1)
             tail_corrupt[:,2] = torch.arange(end = target.num_ent)
