@@ -92,6 +92,8 @@ class TrainData():
 
 		triplets = remove_duplicate(triplets)
 		id2ent, id2rel = self.clean_data(triplets)
+		id2ent = remove_duplicate(id2ent)
+		id2rel = remove_duplicate(id2rel)
 		random.shuffle(id2ent)
 		random.shuffle(id2rel)
 		self.ent2id = {ent: idx for idx, ent in enumerate(id2ent)}
@@ -163,7 +165,7 @@ class TrainData():
 
 class TestNewData():
 	def __init__(self, path, qual=False, data_type="valid", special_relation=True):
-		self.path = path
+		self.path = path + "qual/" if qual else path + "triplet/"
 		self.qual = qual
 		self.data_type = data_type
 		self.special_relation = special_relation
@@ -263,7 +265,7 @@ class TestNewData():
 					if not t.startswith("TRIPLET"):
 						sup_triplets.append((self.ent2id[h], self.rel2id[r], self.ent2id[t]))
 						num_qual_triplet += 1
-					assert (self.ent2id[h], self.rel2id[r], self.ent2id[t]) not in msg_triplets, (self.ent2id[h], self.rel2id[r], self.ent2id[t])
+						assert (self.ent2id[h], self.rel2id[r], self.ent2id[t]) not in msg_triplets, (self.ent2id[h], self.rel2id[r], self.ent2id[t])
 			elif self.data_type == "test":
 				for h, r, t in new_test_triplets:
 					if not t.startswith("TRIPLET"):

@@ -37,5 +37,4 @@ def evaluate(my_model, target, init_emb_ent, init_emb_rel, relation_triplets, qu
             ranks.append(tail_rank)
             tail_ranks.append(tail_rank)
 
-        print(ranks)
         return ranks

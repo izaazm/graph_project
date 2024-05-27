@@ -85,3 +85,5 @@ ranks_qual = evaluate(InGram_qual, test_qual, test_qual_init_emb_ent, test_qual_
 ranks = ranks_triplet + ranks_qual
 
 print_metrics("Test", ranks)
+print_metrics("Test Triplet", ranks_triplet)
+print_metrics("Test Qual", ranks_qual)

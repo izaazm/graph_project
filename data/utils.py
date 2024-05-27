@@ -122,3 +122,48 @@ def gcc(triplet):
 	G.add_edges_from(edge)
 	largest_cc = max(nx.connected_components(G), key=len)
 	return largest_cc
+
+def convert_to_qualifier_graph(facts):
+	id2trp = []
+	for fact in facts:
+		h, r, t = fact
+		id2trp.append((h, r, t))
+
+	sp_rel = "SPECIAL_RELATION"
+
+	# create new triplets
+	id2trp = remove_duplicate(id2trp)
+	trp2id = {trp: idx for idx, trp in enumerate(id2trp)}
+	triplets = []
+	for fact1 in facts:
+		h1, r1, t1 = fact1
+		triplet1_ent = f"TRIPLET_{trp2id[fact1]}"
+		# check for triplet-triplet relation 
+		for fact2 in facts:
+			h2, r2, t2 = fact2
+			triplet2_ent = f"TRIPLET_{trp2id[fact2]}"
+			if t1 == h2:
+				triplets.append((triplet1_ent, sp_rel, triplet2_ent))		
+
+		# check for triplet-qualifier relation
+		for q, v in facts[fact1]:
+			triplets.append((triplet1_ent, q, v))
+	
+	triplets = remove_duplicate(triplets)
+	return id2trp, triplets
+
+def convert_to_triplet_graph(id2trp, triplet):
+	ent = []
+	facts = dict()
+	for h, r, t in triplet:
+		ent.append(h)
+		if t.startswith("TRIPLET"):
+			ent.append(t)
+	ent = remove_duplicate(ent)
+	for e in ent:
+		h, r, t = id2trp[int(e[8:])]
+		facts[(h, r, t)] = []
+	for h, r, t in triplet:
+		if not t.startswith("TRIPLET"):
+			facts[id2trp[int(h[8:])]].append((r, t))
+	return facts

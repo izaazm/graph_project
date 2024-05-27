@@ -9,6 +9,7 @@ from utils import generate_neg, initialize, print_metrics, get_metrics
 import os
 from evaluation import evaluate
 from my_parser import parse
+import gc
 
 OMP_NUM_THREADS = 8
 torch.manual_seed(0)
@@ -86,12 +87,19 @@ for epoch in pbar:
 		print_metrics(f"Validation Triplets Epoch {epoch + 1}", ranks)
 		_, mrr, _, _, _ = get_metrics(ranks)
 
-		if not args.no_write and mrr > best_mrr:
+		if mrr > best_mrr:
 			torch.save({'model_state_dict': ingram_trip.state_dict(), \
 						'optimizer_state_dict': optimizer.state_dict(), \
 						'inf_emb_ent': val_init_emb_ent, \
 						'inf_emb_rel': val_init_emb_rel}, \
 				f"ckpt/{args.exp}/{args.data_name}/{file_format}_best_triplet.ckpt")
-			
+			best_mrr = mrr
+		
+del ingram_trip, msg, sup
+_ = gc.collect()
+torch.cuda.empty_cache()
+
+print("Finished Training")
+print(best_mrr)
 losses = np.array(losses)
 np.save(f"ckpt/{args.exp}/{args.data_name}/{file_format}_loss_triplet.npy", losses)
