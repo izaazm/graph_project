@@ -26,8 +26,7 @@ path = args.data_path + args.data_name + "/"
 train = TrainData(path, qual=True, special_relation=False)
 valid = TestNewData(path, qual=True, data_type="valid", special_relation=False) 
 
-if not args.no_write:
-	os.makedirs(f"./ckpt/{args.exp}/{args.data_name}", exist_ok=True)
+os.makedirs(f"./ckpt/{args.exp}/{args.data_name}", exist_ok=True)
 file_format = f"lr_{args.learning_rate}_dim_{args.dimension_entity}_{args.dimension_relation}" + \
 			  f"_bin_{args.num_bin}_total_{args.num_epoch}_every_{args.validation_epoch}" + \
 			  f"_neg_{args.num_neg}_layer_{args.num_layer_ent}_{args.num_layer_rel}" + \
