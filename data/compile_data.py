@@ -1,8 +1,14 @@
 import os
 import json
+import argparse
 
-out_path = "./JF17K_25"
-data_dir = './JF17K'
+parser = argparse.ArgumentParser()
+parser.add_argument('data_src')
+parser.add_argument('data_tgt')
+args = parser.parse_args()
+
+out_path = args.data_tgt
+data_dir = args.data_src
 
 if os.path.exists(os.path.join(out_path, "full.json")):
     os.remove(os.path.join(out_path, "full.json"))
@@ -60,7 +66,6 @@ assert total_fact_write == total_fact_read
 print(f"Compile finished, Total facts = {total_fact_read}")
 
 # Create relation and entities dictionary
-
 if os.path.exists(os.path.join(out_path, "rel2id.txt")):
     os.remove(os.path.join(out_path, "rel2id.txt"))
 

@@ -1,9 +1,9 @@
 from scipy.sparse import csr_matrix
 from tqdm import tqdm
-from utils import *
 import numpy as np
 import math
 import igraph
+
 def create_relation_graph(triplet, num_ent, num_rel):
 	ind_h = triplet[:,:2]
 	ind_t = triplet[:,1:]
