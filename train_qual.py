@@ -1,4 +1,3 @@
-# from relgraph import generate_relation_triplets
 from dataset import TrainData, TestNewData
 from tqdm import tqdm
 import random

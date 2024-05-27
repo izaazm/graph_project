@@ -29,9 +29,6 @@ class TrainData():
 		id2ent, id2rel, id2trp = [], [], []
 		for fact in fact_all:
 			h, r, t = fact
-			id2ent.append(h)
-			id2ent.append(t)
-			id2rel.append(r)
 			id2trp.append((h, r, t))
 			if self.qual:
 				for (q, v) in fact_all[(h, r, t)]:
@@ -77,6 +74,7 @@ class TrainData():
 				h, r, t = fact
 				triplets.append((h, r, t))
 
+		triplets = remove_duplicate(triplets)
 		# # removing unnecessary triplets
 		id2ent = []
 		id2rel = []
@@ -90,7 +88,6 @@ class TrainData():
 		id2rel = remove_duplicate(id2rel)
 		random.shuffle(id2ent)
 		random.shuffle(id2rel)
-		triplets = remove_duplicate(triplets)
 		self.ent2id = {ent: idx for idx, ent in enumerate(id2ent)}
 		self.rel2id = {rel: idx for idx, rel in enumerate(id2rel)}
 		triplets = [(self.ent2id[h], self.rel2id[r], self.ent2id[t]) for h, r, t in triplets]
@@ -149,8 +146,7 @@ class TrainData():
 		random.shuffle(sup)
 		sup = np.array(sup)
 		add_num = max(int(self.num_triplets * p) - len(msg), 0)
-		if add_num > 0:
-			msg = np.concatenate([msg, sup[:add_num]])
+		msg = np.concatenate([msg, sup[:add_num]])
 		sup = sup[add_num:]
 
 		msg_inv = np.fliplr(msg).copy()

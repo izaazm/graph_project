@@ -52,6 +52,20 @@ for fact in inference_facts:
         if r in relation_train or q in relation_train:
             num_fact_existing_relation += 1
 
+train_fact_with_qual = 0
+total_train_qual = 0
+for fact in train_facts:
+    if len(train_facts[fact]) > 0:
+        train_fact_with_qual += 1
+        total_train_qual += len(train_facts[fact])
+
+inference_fact_with_qual = 0
+total_inference_qual = 0
+for fact in inference_facts:
+    if len(inference_facts[fact]) > 0:
+        inference_fact_with_qual += 1
+        total_inference_qual += len(inference_facts[fact])
+
 intersection_entity = intersection(entity_train, entity_inference)
 intersection_relation = intersection(relation_train, relation_inference)
 percent_fact_new_relation = 1 - num_fact_existing_relation / len(inference_facts)
@@ -63,5 +77,10 @@ print(f"Number of entities in inference: {len(entity_inference)}")
 print(f"Number of relations in train: {len(relation_train)}")
 print(f"Number of relations in inference: {len(relation_inference)}")
 print("\n")
-print(f"Number of facts with new relation: {percent_fact_new_relation}")
+print(f"Number of facts with qual in train: {train_fact_with_qual}")
+print(f"Total number of qual in train: {total_train_qual}")
+print(f"Number of facts with qual in inference: {inference_fact_with_qual}")
+print(f"Total number of qual in inference: {total_inference_qual}")
+print("\n")
+print(f"Number of facts with new relation: {len(inference_facts) - num_fact_existing_relation}")
 print(f"Percentage of facts with new relation: {percent_fact_new_relation}")
