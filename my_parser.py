@@ -19,7 +19,7 @@ def parse(test=False):
     parser.add_argument('-sp', '--special_relation', default = True, type = bool)
     if test:
         parser.add_argument('--target_epoch', default = 6600, type = int)
-    parser.add_argument('-v', '--validation_epoch', default = 200, type = int)
+    parser.add_argument('-v', '--validation_epoch', default = 100, type = int)
     parser.add_argument('--num_head', default = 8, type = int)
     parser.add_argument('--num_neg', default = 10, type = int)
     if not test:
