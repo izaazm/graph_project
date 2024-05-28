@@ -86,12 +86,13 @@ for epoch in pbar:
 		print_metrics(f"Validation Triplets Epoch {epoch + 1}", ranks)
 		_, mrr, _, _, _ = get_metrics(ranks)
 
+		torch.save({'model_state_dict': ingram_trip.state_dict(), \
+					'optimizer_state_dict': optimizer.state_dict(), \
+					'inf_emb_ent': val_init_emb_ent, \
+					'inf_emb_rel': val_init_emb_rel}, \
+			f"ckpt/{args.exp}/{args.data_name}/{file_format}_best_qual.ckpt")
+		
 		if mrr > best_mrr:
-			torch.save({'model_state_dict': ingram_trip.state_dict(), \
-						'optimizer_state_dict': optimizer.state_dict(), \
-						'inf_emb_ent': val_init_emb_ent, \
-						'inf_emb_rel': val_init_emb_rel}, \
-				f"ckpt/{args.exp}/{args.data_name}/{file_format}_best_triplet.ckpt")
 			best_mrr = mrr
 		
 del ingram_trip, msg, sup
