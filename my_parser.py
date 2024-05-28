@@ -20,6 +20,7 @@ def parse(test=False):
     parser.add_argument('-v', '--validation_epoch', default = 100, type = int)
     parser.add_argument('--num_head', default = 8, type = int)
     parser.add_argument('--num_neg', default = 10, type = int)
+    parser.add_argument('--save_method', default = 'latest', type = str)
 
     args = parser.parse_args()
 
